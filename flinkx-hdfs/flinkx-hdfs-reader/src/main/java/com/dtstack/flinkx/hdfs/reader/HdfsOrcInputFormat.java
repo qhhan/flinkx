@@ -216,8 +216,9 @@ public class HdfsOrcInputFormat extends HdfsInputFormat {
         public OrcSplit getOrcSplit() throws IOException {
             ByteArrayInputStream bais = new ByteArrayInputStream(orcSplitData);
             DataInputStream dis = new DataInputStream(bais);
-            OrcSplit orcSplit = new OrcSplit(null, 0, 0, null, null
-                    , false, false,new ArrayList());
+//            OrcSplit orcSplit = new OrcSplit(null, 0, 0, null, null
+//                    , false, false,new ArrayList());
+            OrcSplit orcSplit = new OrcSplit(null, null, 0L, 0L, null, null, false, false, new ArrayList<>(), 0L);
             orcSplit.readFields(dis);
             bais.close();
             dis.close();
