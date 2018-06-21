@@ -110,8 +110,12 @@ public abstract class HdfsOutputFormat extends RichOutputFormat implements Clean
         }
     }
 
+    protected void configInternal() {
+
+    }
+
     @Override
-    public void configure(Configuration configuration) {
+    protected void openInternal(int taskNumber, int numTasks) throws IOException {
         if(StringUtils.isNotBlank(fileName)) {
             this.outputFilePath = path + SP + fileName;
         } else {
@@ -142,15 +146,8 @@ public abstract class HdfsOutputFormat extends RichOutputFormat implements Clean
             throw new RuntimeException(e);
         }
 
-    }
-
-    protected void configInternal() {
-
-    }
-
-    @Override
-    protected void openInternal(int taskNumber, int numTasks) throws IOException {
         configInternal();
+
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String dateString = formatter.format(currentTime);
