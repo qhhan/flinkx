@@ -22,7 +22,6 @@ import com.dtstack.flinkx.outputformat.RichOutputFormat;
 import com.dtstack.flinkx.util.SysUtil;
 import org.apache.commons.lang.StringUtils;
 import org.apache.flink.api.common.io.CleanupWhenUnsuccessful;
-import org.apache.flink.configuration.Configuration;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -32,7 +31,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
+import org.apache.hadoop.conf.Configuration;
 /**
  * The Hdfs implementation of OutputFormat
  *
@@ -84,7 +83,7 @@ public abstract class HdfsOutputFormat extends RichOutputFormat implements Clean
 
     protected int[] colIndices;
 
-    protected org.apache.hadoop.conf.Configuration conf;
+    protected Configuration conf;
 
     protected void initColIndices() {
         if (fullColumnNames == null || fullColumnNames.size() == 0) {
@@ -124,7 +123,7 @@ public abstract class HdfsOutputFormat extends RichOutputFormat implements Clean
 
         initColIndices();
 
-        conf = new org.apache.hadoop.conf.Configuration();
+        conf = new Configuration();
 
         if(hadoopConfig != null) {
             for (Map.Entry<String, String> entry : hadoopConfig.entrySet()) {
@@ -134,24 +133,17 @@ public abstract class HdfsOutputFormat extends RichOutputFormat implements Clean
 
         conf.set("fs.default.name", defaultFS);
         conf.set("fs.hdfs.impl.disable.cache", "true");
-        try {
-            fs = FileSystem.get(conf);
-            Path dir = new Path(outputFilePath);
-            // dir不能是文件
-            if(fs.exists(dir) && fs.isFile(dir)){
-                throw new RuntimeException("Can't write new files under common file: " + dir + "\n"
+        fs = FileSystem.get(conf);
+        Path dir = new Path(outputFilePath);
+        // dir不能是文件
+        if(fs.exists(dir) && fs.isFile(dir)){
+            throw new RuntimeException("Can't write new files under common file: " + dir + "\n"
                         + "One can only write new files under directories");
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
         }
-
         configInternal();
-
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String dateString = formatter.format(currentTime);
-
         tmpPath = outputFilePath + SP + DATA_SUBDIR + SP + taskNumber + "." + dateString;
         finishedPath = outputFilePath + SP + FINISHED_SUBDIR + SP + taskNumber;
         open();
